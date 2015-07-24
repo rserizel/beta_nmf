@@ -116,8 +116,8 @@ class BetaNMF:
         if beta > 2:
             gamma = 1/(beta-1)
         tX = theano.shared(X.astype(theano.config.floatX), name="X")
-        tH = theano.shared(self.factors_[0], name="H")
-        tW = theano.shared(self.factors_[1], name="W")
+        tH = theano.shared(self.factors_[0].astype(theano.config.floatX), name="H")
+        tW = theano.shared(self.factors_[1].astype(theano.config.floatX), name="W")
 
         trainW = theano.function(inputs=[],
                                  outputs=[],
@@ -191,11 +191,11 @@ class BetaNMF:
             The beta-divergence
         """
         tX = theano.shared(X.astype(theano.config.floatX), name="X")
-        tH = theano.shared(self.factors_[0], name="H")
-        tW = theano.shared(self.factors_[1].T, name="W")
+        tH = theano.shared(self.factors_[0].astype(theano.config.floatX), name="H")
+        tW = theano.shared(self.factors_[1].astype(theano.config.floatX), name="W")
 
         div = theano.function(inputs=[],
-                              outputs=beta_div(tX, tW, tH, self.beta),
+                              outputs=beta_div(tX, tW.T, tH, self.beta),
                               name="div")
         return div()
 
