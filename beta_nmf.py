@@ -17,20 +17,23 @@ import time
 import numpy as np
 import theano
 import theano.tensor as T
+from theano.ifelse import ifelse
 
 FILE_NAME = ("short_set_cqt.h5")
 
 
 def beta_div(X, W, H, beta):
     """Compute betat divergence"""
-    if beta == 0:
-        return T.sum(X / T.dot(H, W) - T.log(X / T.dot(H, W)) - 1)
-    if beta == 1:
-        return T.sum(T.mul(X, (T.log(X) - T.log(T.dot(H, W)))) + T.dot(H, W) - X)
-    return T.sum(1. / (beta * (beta - 1.))
-                 * (T.power(X, beta)
-                    + (beta - 1.) * T.power(T.dot(H, W), beta)
-                    - beta * T.power(T.mul(X, T.dot(H, W)), (beta - 1))))
+    div = ifelse(T.eq(beta, 0),
+                 T.sum(X / T.dot(H, W) - T.log(X / T.dot(H, W)) - 1),
+                 ifelse(T.eq(beta, 1), 
+                        T.sum(T.mul(X, (T.log(X) - T.log(T.dot(H, W)))) + T.dot(H, W) - X),
+                        T.sum(1. / (beta * (beta - 1.)) * (T.power(X, beta)
+                        + (beta - 1.) * T.power(T.dot(H, W), beta)
+                        - beta * T.power(T.mul(X, T.dot(H, W)), (beta - 1))))
+                        )
+                )
+    return div
 
 
 def load_data(f_name, scale=True, rnd=True):
@@ -109,12 +112,7 @@ class BetaNMF:
             gives weights to apply on the cost function
         """
 
-        beta = self.beta
-        gamma = 1
-        if beta < 1:
-            gamma = 1/(2-beta)
-        if beta > 2:
-            gamma = 1/(beta-1)
+        tbeta = theano.shared(self.beta, name="beta")
         tX = theano.shared(X.astype(theano.config.floatX), name="X")
         tH = theano.shared(self.factors_[0].astype(theano.config.floatX), name="H")
         tW = theano.shared(self.factors_[1].astype(theano.config.floatX), name="W")
@@ -122,19 +120,19 @@ class BetaNMF:
         trainW = theano.function(inputs=[],
                                  outputs=[],
                                  updates={tW:tW*(T.power(((T.dot(T.mul(T.power(T.dot(tH, tW.T),
-                                                                               (beta - 2)), tX).T,
+                                                                               (tbeta - 2)), tX).T,
                                                                  tH))
                                                           /(T.dot(T.power(T.dot(tH, tW.T),
-                                                                          (beta-1)).T, tH))),
+                                                                          (tbeta-1)).T, tH))),
                                                          gamma))},
                                  name="trainH")
         trainH = theano.function(inputs=[],
                                  outputs=[],
                                  updates={tH:tH*(T.power(((T.dot(T.mul(T.power(T.dot(tH, tW.T),
-                                                                               (beta - 2)), tX),
+                                                                               (tbeta - 2)), tX),
                                                                  tW))
                                                           /(T.dot(T.power(T.dot(tH, tW.T),
-                                                                          (beta-1)), tW))),
+                                                                          (tbeta-1)), tW))),
                                                          gamma))},
                                  name="trainH")
 
@@ -190,12 +188,13 @@ class BetaNMF:
         out : float
             The beta-divergence
         """
+        tbeta = theano.shared(self.beta, name="beta")
         tX = theano.shared(X.astype(theano.config.floatX), name="X")
         tH = theano.shared(self.factors_[0].astype(theano.config.floatX), name="H")
         tW = theano.shared(self.factors_[1].astype(theano.config.floatX), name="W")
 
         div = theano.function(inputs=[],
-                              outputs=beta_div(tX, tW.T, tH, self.beta),
+                              outputs=beta_div(tX, tW.T, tH, tbeta),
                               name="div")
         return div()
 
