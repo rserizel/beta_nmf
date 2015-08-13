@@ -19,7 +19,7 @@ import theano
 import theano.tensor as T
 from theano.ifelse import ifelse
 
-FILE_NAME = ("short_set_cqt.h5")
+FILE_NAME = ("../short_set_cqt.h5")
 
 
 def beta_div(X, W, H, beta):
@@ -119,21 +119,19 @@ class BetaNMF:
 
         trainW = theano.function(inputs=[],
                                  outputs=[],
-                                 updates={tW:tW*(T.power(((T.dot(T.mul(T.power(T.dot(tH, tW.T),
-                                                                               (tbeta - 2)), tX).T,
+                                 updates={tW:tW*((T.dot(T.mul(T.power(T.dot(tH, tW.T),
+                                                                       (tbeta - 2)), tX).T,
                                                                  tH))
                                                           /(T.dot(T.power(T.dot(tH, tW.T),
-                                                                          (tbeta-1)).T, tH))),
-                                                         gamma))},
+                                                                          (tbeta-1)).T, tH)))},
                                  name="trainH")
         trainH = theano.function(inputs=[],
                                  outputs=[],
-                                 updates={tH:tH*(T.power(((T.dot(T.mul(T.power(T.dot(tH, tW.T),
-                                                                               (tbeta - 2)), tX),
+                                 updates={tH:tH*((T.dot(T.mul(T.power(T.dot(tH, tW.T),
+                                                                       (tbeta - 2)), tX),
                                                                  tW))
                                                           /(T.dot(T.power(T.dot(tH, tW.T),
-                                                                          (tbeta-1)), tW))),
-                                                         gamma))},
+                                                                          (tbeta-1)), tW)))},
                                  name="trainH")
 
         print 'Fitting NMF model with %d iterations....' % self.n_iter
