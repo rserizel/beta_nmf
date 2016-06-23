@@ -1,0 +1,345 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Documentation &mdash; Beta-NMF for GPGPU 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Beta-NMF for GPGPU 1.0 documentation" href="index.html" />
+    <link rel="prev" title="NMF with \(\beta\) divergence and multiplicative updates" href="intro.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="NMF with \(\beta\) divergence and multiplicative updates"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Beta-NMF for GPGPU 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-beta_nmf">
+<span id="documentation"></span><h1>Documentation<a class="headerlink" href="#module-beta_nmf" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="beta-nmf-py">
+<h2>beta_nmf.py<a class="headerlink" href="#beta-nmf-py" title="Permalink to this headline">¶</a></h2>
+<p>The beta_nmf module includes the beta_nmf class,
+fit function and theano functions to compute updates and cost.</p>
+<dl class="class">
+<dt id="beta_nmf.BetaNMF">
+<em class="property">class </em><code class="descclassname">beta_nmf.</code><code class="descname">BetaNMF</code><span class="sig-paren">(</span><em>data_shape</em>, <em>n_components=50</em>, <em>beta=2</em>, <em>n_iter=100</em>, <em>fixed_factors=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beta_nmf.html#BetaNMF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#beta_nmf.BetaNMF" title="Permalink to this definition">¶</a></dt>
+<dd><p>BetaNMF class</p>
+<p>Performs nonnegative matrix factorization with Theano.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data_shape</strong> : tuple composed of integers</p>
+<blockquote>
+<div><p>the shape of the data to approximate</p>
+</div></blockquote>
+<p><strong>n_components</strong> : positive integer (default 50)</p>
+<blockquote>
+<div><p>the number of latent components for the NMF model</p>
+</div></blockquote>
+<p><strong>beta</strong> : arbitrary float (default 2)</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>the beta-divergence to consider, particular cases of interest are</dt>
+<dd><ul class="first last simple">
+<li>beta=2 : Euclidean distance</li>
+<li>beta=1 : Kullback Leibler</li>
+<li>beta=0 : Itakura-Saito</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>n_iter</strong> : Positive integer (default 100)</p>
+<blockquote>
+<div><p>number of iterations</p>
+</div></blockquote>
+<p><strong>fixed_factors</strong> : array (default Null)</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>list of factors that are not updated</dt>
+<dd><p class="first">e.g. fixed_factors = [0] -&gt; H is not updated</p>
+<p class="last">fixed_factors = [1] -&gt; W is not updated</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>verbose</strong> : Integer</p>
+<blockquote class="last">
+<div><p>the frequence at which the score should be computed and displayed
+(number of iterations between each computation)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="11%" />
+<col width="89%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>factors</td>
+<td>(list of arrays) The estimated factors (factors[0] = H)</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#beta_nmf.BetaNMF.fit" title="beta_nmf.BetaNMF.fit"><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code></a>(X)</td>
+<td>Learns NMF model</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#beta_nmf.BetaNMF.score" title="beta_nmf.BetaNMF.score"><code class="xref py py-obj docutils literal"><span class="pre">score</span></code></a>(X)</td>
+<td>Computes the total beta-divergence between the current model and X</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="beta_nmf.BetaNMF.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beta_nmf.html#BetaNMF.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#beta_nmf.BetaNMF.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Learns NMF model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : ndarray with nonnegative entries</p>
+<blockquote>
+<div><p>The input array</p>
+</div></blockquote>
+<p><strong>W</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>Optional ndarray that can be broadcasted with X and
+gives weights to apply on the cost function</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="beta_nmf.BetaNMF.score">
+<code class="descname">score</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beta_nmf.html#BetaNMF.score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#beta_nmf.BetaNMF.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the total beta-divergence between the current model and X</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : array</p>
+<blockquote>
+<div><p>The input data</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> : float</p>
+<blockquote class="last">
+<div><p>The beta-divergence</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-base"></span><div class="section" id="base-py">
+<h2>base.py<a class="headerlink" href="#base-py" title="Permalink to this headline">¶</a></h2>
+<p>The base module includes the basic functions such as
+beta-divergence, nonnegative random matrices generator or load_data.</p>
+<dl class="function">
+<dt id="base.beta_div">
+<code class="descclassname">base.</code><code class="descname">beta_div</code><span class="sig-paren">(</span><em>X</em>, <em>W</em>, <em>H</em>, <em>beta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/base.html#beta_div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.beta_div" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute beta divergence D(X|WH)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : Theano tensor</p>
+<blockquote>
+<div><p>data</p>
+</div></blockquote>
+<p><strong>W</strong> : Theano tensor</p>
+<blockquote>
+<div><p>Bases</p>
+</div></blockquote>
+<p><strong>H</strong> : Theano tensor</p>
+<blockquote>
+<div><p>activation matrix</p>
+</div></blockquote>
+<p><strong>beta</strong> : Theano scalar</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>div</strong> : Theano scalar</p>
+<blockquote class="last">
+<div><p>beta divergence D(X|WH)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="base.load_data">
+<code class="descclassname">base.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>f_name</em>, <em>scale=True</em>, <em>rnd=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/base.html#load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get data from H5FS file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>f_name</strong> : String</p>
+<blockquote>
+<div><p>file name</p>
+</div></blockquote>
+<p><strong>scale</strong> : Boolean (default True)</p>
+<blockquote>
+<div><p>scale data to unit variance (scikit-learn function)</p>
+</div></blockquote>
+<p><strong>rnd</strong> : Boolean (default True)</p>
+<blockquote>
+<div><p>randomize the data along time axis</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>data</strong> : Dictionnary</p>
+<blockquote class="last">
+<div><p>dictionary containing the data</p>
+<p>x_train: numpy array</p>
+<blockquote>
+<div><p>train data matrix</p>
+</div></blockquote>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="base.nnrandn">
+<code class="descclassname">base.</code><code class="descname">nnrandn</code><span class="sig-paren">(</span><em>shape</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/base.html#nnrandn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.nnrandn" title="Permalink to this definition">¶</a></dt>
+<dd><p>generates randomly a nonnegative ndarray of given shape</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>shape</strong> : tuple</p>
+<blockquote>
+<div><p>The shape</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> : array of given shape</p>
+<blockquote class="last">
+<div><p>The non-negative random numbers</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation</a><ul>
+<li><a class="reference internal" href="#beta-nmf-py">beta_nmf.py</a></li>
+<li><a class="reference internal" href="#base-py">base.py</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">NMF with <span class="math">\(\beta\)</span> divergence and multiplicative updates</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/doc.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="NMF with \(\beta\) divergence and multiplicative updates"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Beta-NMF for GPGPU 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Romain Serizel.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

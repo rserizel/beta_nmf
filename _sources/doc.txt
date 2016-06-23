@@ -1,0 +1,16 @@
+Documentation
+-------------
+
+.. automodule:: beta_nmf
+ 
+	.. autoclass:: BetaNMF
+		:members:
+
+
+.. automodule:: base
+
+	.. autofunction:: beta_div
+
+	.. autofunction:: load_data
+
+	.. autofunction:: nnrandn

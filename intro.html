@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>NMF with \(\beta\) -divergence and multiplicative updates &mdash; Beta-NMF for GPGPU 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Beta-NMF for GPGPU 1.0 documentation" href="index.html" />
+    <link rel="next" title="Documentation" href="doc.html" />
+    <link rel="prev" title="Beta-NMF for GPGPU" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="doc.html" title="Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Beta-NMF for GPGPU"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Beta-NMF for GPGPU 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nmf-with-divergence-and-multiplicative-updates">
+<h1>NMF with <span class="math">\(\beta\)</span> -divergence and multiplicative updates<a class="headerlink" href="#nmf-with-divergence-and-multiplicative-updates" title="Permalink to this headline">¶</a></h1>
+<p>Consider the (nonnegative) matrix <span class="math">\(\textbf{V}\in\mathbb{R}_+^{F\times N}\)</span>. The goal of NMF <a class="footnote-reference" href="#id11" id="id1">[1]</a> is to find a factorisation for <span class="math">\(\textbf{V}\)</span> of the form:</p>
+<div class="math">
+\[\textbf{V} \approx \textbf{W}\textbf{H}\label{nmf}\]</div>
+<p>where <span class="math">\(\textbf{W}\in\mathbb{R}_+^{F\times K}\)</span> , <span class="math">\(\textbf{H}\in\mathbb{R}_+^{K\times N}\)</span> and <span class="math">\(K\)</span> is the number of components in the decomposition. The NMF model estimation is usually considered as solving the following optimisation problem:</p>
+<div class="math">
+\[\min_{\textbf{W}\textbf{H}}D(\textbf{V} | \textbf{W}\textbf{H})\quad\mathrm{s.t.}\quad\textbf{W}\geq 0,\ \textbf{H}\geq 0\mathrm{.}\]</div>
+<p>Where <span class="math">\(D\)</span> is a separable divergence such as:</p>
+<div class="math">
+\[D(\textbf{V}|\textbf{W}\textbf{H}) = \sum\limits_{f=1}^{F}\sum\limits_{n=1}^{N}d([\textbf{V}]_{fn}|[\textbf{WH}]_{fn})\textrm{,}\]</div>
+<p>with <span class="math">\([.]_{fn}\)</span> is the element on column <span class="math">\(n\)</span> and line <span class="math">\(f\)</span> of a matrix and <span class="math">\(d\)</span> is a scalar cost function. A common choice for the cost function is the <span class="math">\(\beta\)</span> -divergence <a class="footnote-reference" href="#id12" id="id2">[2]</a>  <a class="footnote-reference" href="#id13" id="id3">[3]</a> <a class="footnote-reference" href="#id14" id="id4">[4]</a> defined as follows:</p>
+<div class="math">
+\[\begin{split}d_{\beta}(x|y)\triangleq
+\begin{cases}
+\frac{1}{\beta(\beta -1)} (x^{\beta} + (\beta -1)y^{\beta} - \beta xy^{(\beta-1)})&amp;\beta\in\mathbb{R}\backslash\{0,1\}\nonumber\\
+x\log\frac{x}{y} - x + y&amp;\beta=1\nonumber\\
+\frac{x}{y} -\log\frac{x}{y} - 1&amp;\beta=0\nonumber\textrm{.}
+\end{cases}\end{split}\]</div>
+<p>Popular cost functions such as the Euclidean distance, the generalised KL divergence <a class="footnote-reference" href="#id15" id="id5">[5]</a> and the IS divergence <a class="footnote-reference" href="#id16" id="id6">[6]</a> and all particular cases of the $beta$-divergence (obtained for <span class="math">\(\beta=2\)</span> , <span class="math">\(1\)</span> and <span class="math">\(0\)</span>, respectively). The use of the <span class="math">\(\beta\)</span> -divergence for NMF has been studied extensively in Févotte et al. <a class="footnote-reference" href="#id17" id="id7">[7]</a>.  In most cases NMF problem is solved using a two-block coordinate descent approach. Each of the factors <span class="math">\(\textbf{W}\)</span> and <span class="math">\(\textbf{H}\)</span> is optimised alternatively. The sub-problem in one factor can then be considered as a nonnegative least square problem (NNLS) <a class="footnote-reference" href="#id18" id="id8">[8]</a>. The approach implemented here to solve these NNLS problems relies on the multiplicative update rules introduced in Lee et al. <a class="footnote-reference" href="#id11" id="id9">[1]</a> for the Euclidean distance and later generalised to the the <span class="math">\(\beta\)</span> -divergence <a class="footnote-reference" href="#id17" id="id10">[7]</a> :</p>
+<div class="math">
+\[\begin{split}\begin{align}
+\textbf{H}&amp;\gets \textbf{H}\odot\frac{\textbf{W}^T\left[(\textbf{W}\textbf{H})^{\beta-2}\odot\textbf{V}\right]}
+{\textbf{W}^T(\textbf{W}\textbf{H})^{\beta-1}}\label{upH}\\
+\textbf{W}&amp;\gets \textbf{W}\odot\frac{\left[(\textbf{W}\textbf{H})^{\beta-2}\odot\textbf{V}\right]\textbf{H}^T }
+{(\textbf{W}\textbf{H})^{\beta-1}\textbf{H}^T}\mathrm{;}\label{upW}
+\end{align}\end{split}\]</div>
+<p>where <span class="math">\(\odot\)</span> is the element-wise product (Hadamard product) and division and power are element-wise. The matrices <span class="math">\(\textbf{H}\)</span> and <span class="math">\(\textbf{W}\)</span> are then updated according to an alternating update scheme.</p>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils footnote" frame="void" id="id11" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id9">2</a>)</em> <ol class="last upperalpha simple" start="4">
+<li><ol class="first upperalpha" start="4">
+<li>Lee and H. S. Seung, “Learning the parts of objects by non-negative matrix factorization.,” <em>Nature</em>, vol. 401, no. 6755, pp. 788–791, 1999.</li>
+</ol>
+</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id12" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td><ol class="first last upperalpha simple">
+<li>Basu, I. R. Harris, N. L. Hjort, and M. C. Jones, “Robust and efficient estimation by minimising a density power divergence,” <em>Biometrika</em>, vol. 85, no. 3, pp. 549–559, 1998.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id13" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td><ol class="first last upperalpha simple">
+<li>Cichocki and S. Amari, “Families of alpha-beta-and gamma-divergences: Flexible and robust measures of similarities,” <em>Entropy</em>, vol. 12, no. 6, pp. 1532–1568, 2010.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td><ol class="first last upperalpha simple" start="19">
+<li>Eguchi and Y. Kano, “Robustifing maximum likelihood estimation,” Research Memo 802, Institute of Statistical Mathematics, June 2001.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id15" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td><ol class="first last upperalpha simple" start="19">
+<li>Kullback and R. A. Leibler, “On information and sufficiency,” <em>The annals of mathematical statistics</em>, pp. 79–86, 1951.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id16" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td><ol class="first last upperalpha simple" start="6">
+<li>Itakura, “Minimum prediction residual principle applied to speech recognition,” <em>IEEE Transactions on Acoustics, Speech and Signal Processing</em>, vol. 23, no. 1, pp. 67–72, 1975.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id17" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[7]</td><td><em>(<a class="fn-backref" href="#id7">1</a>, <a class="fn-backref" href="#id10">2</a>)</em> <ol class="last upperalpha simple" start="3">
+<li>Févotte and J. Idier, “Algorithms for nonnegative matrix factorization with the beta-divergence,” <em>Neural Computation</em>, vol. 23, no. 9, pp. 2421–2456, 2011.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id18" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[8]</a></td><td><ol class="first last upperalpha simple" start="14">
+<li>Gillis, “The why and how of nonnegative matrix factorization,” in <em>Regularization, Optimization, Kernels, and Support Vector Machines</em>, M. Signoretto J.A.K. Suykens and A. Argyriou, Eds., Machine Learning and Pattern Recognition Series, pp. 257 – 291. Chapman &amp; Hall/CRC, 2014.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">NMF with <span class="math">\(\beta\)</span> -divergence and multiplicative updates</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Beta-NMF for GPGPU</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="doc.html"
+                        title="next chapter">Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/intro.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="doc.html" title="Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Beta-NMF for GPGPU"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Beta-NMF for GPGPU 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Romain Serizel.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+NMF with :math:`\beta` -divergence and multiplicative updates
+-------------------------------------------------------------
+
+Consider the (nonnegative) matrix :math:`\textbf{V}\in\mathbb{R}_+^{F\times N}`. The goal of NMF [1]_ is to find a factorisation for :math:`\textbf{V}` of the form:
+
+.. math::
+	\textbf{V} \approx \textbf{W}\textbf{H}\label{nmf}
+
+where :math:`\textbf{W}\in\mathbb{R}_+^{F\times K}` , :math:`\textbf{H}\in\mathbb{R}_+^{K\times N}` and :math:`K` is the number of components in the decomposition. The NMF model estimation is usually considered as solving the following optimisation problem:
+
+.. math::
+	\min_{\textbf{W}\textbf{H}}D(\textbf{V} | \textbf{W}\textbf{H})\quad\mathrm{s.t.}\quad\textbf{W}\geq 0,\ \textbf{H}\geq 0\mathrm{.}
+
+Where :math:`D` is a separable divergence such as:
+
+.. math::
+	D(\textbf{V}|\textbf{W}\textbf{H}) = \sum\limits_{f=1}^{F}\sum\limits_{n=1}^{N}d([\textbf{V}]_{fn}|[\textbf{WH}]_{fn})\textrm{,}
+
+with :math:`[.]_{fn}` is the element on column :math:`n` and line :math:`f` of a matrix and :math:`d` is a scalar cost function. A common choice for the cost function is the :math:`\beta` -divergence [2]_  [3]_ [4]_ defined as follows:
+
+.. math::
+ 	d_{\beta}(x|y)\triangleq 
+  	\begin{cases}
+ 	\frac{1}{\beta(\beta -1)} (x^{\beta} + (\beta -1)y^{\beta} - \beta xy^{(\beta-1)})&\beta\in\mathbb{R}\backslash\{0,1\}\nonumber\\
+ 	x\log\frac{x}{y} - x + y&\beta=1\nonumber\\
+ 	\frac{x}{y} -\log\frac{x}{y} - 1&\beta=0\nonumber\textrm{.}
+ 	\end{cases}
+
+Popular cost functions such as the Euclidean distance, the generalised KL divergence [5]_ and the IS divergence [6]_ and all particular cases of the $\beta$-divergence (obtained for :math:`\beta=2` , :math:`1` and :math:`0`, respectively). The use of the :math:`\beta` -divergence for NMF has been studied extensively in Févotte et al. [7]_.  In most cases NMF problem is solved using a two-block coordinate descent approach. Each of the factors :math:`\textbf{W}` and :math:`\textbf{H}` is optimised alternatively. The sub-problem in one factor can then be considered as a nonnegative least square problem (NNLS) [8]_. The approach implemented here to solve these NNLS problems relies on the multiplicative update rules introduced in Lee et al. [1]_ for the Euclidean distance and later generalised to the the :math:`\beta` -divergence [7]_ :
+
+.. math::
+	\begin{align}
+	\textbf{H}&\gets \textbf{H}\odot\frac{\textbf{W}^T\left[(\textbf{W}\textbf{H})^{\beta-2}\odot\textbf{V}\right]}
+	{\textbf{W}^T(\textbf{W}\textbf{H})^{\beta-1}}\label{upH}\\
+	\textbf{W}&\gets \textbf{W}\odot\frac{\left[(\textbf{W}\textbf{H})^{\beta-2}\odot\textbf{V}\right]\textbf{H}^T }
+	{(\textbf{W}\textbf{H})^{\beta-1}\textbf{H}^T}\mathrm{;}\label{upW}
+	\end{align}
+
+where :math:`\odot` is the element-wise product (Hadamard product) and division and power are element-wise. The matrices :math:`\textbf{H}` and :math:`\textbf{W}` are then updated according to an alternating update scheme.
+
+References
+++++++++++
+
+.. [1] D. D. Lee and H. S. Seung, “Learning the parts of objects by non-negative matrix factorization.,” *Nature*, vol. 401, no. 6755, pp. 788–791, 1999.
+
+.. [2] A. Basu, I. R. Harris, N. L. Hjort, and M. C. Jones, “Robust and efficient estimation by minimising a density power divergence,” *Biometrika*, vol. 85, no. 3, pp. 549–559, 1998.
+
+.. [3] A. Cichocki and S. Amari, “Families of alpha-beta-and gamma-divergences: Flexible and robust measures of similarities,” *Entropy*, vol. 12, no. 6, pp. 1532–1568, 2010.
+
+.. [4] S. Eguchi and Y. Kano, “Robustifing maximum likelihood estimation,” Research Memo 802, Institute of Statistical Mathematics, June 2001.
+
+.. [5] S. Kullback and R. A. Leibler, “On information and sufficiency,” *The annals of mathematical statistics*, pp. 79–86, 1951.
+
+.. [6] F. Itakura, “Minimum prediction residual principle applied to speech recognition,” *IEEE Transactions on Acoustics, Speech and Signal Processing*, vol. 23, no. 1, pp. 67–72, 1975.
+
+.. [7] C. Févotte and J. Idier, “Algorithms for nonnegative matrix factorization with the beta-divergence,” *Neural Computation*, vol. 23, no. 9, pp. 2421–2456, 2011.
+
+.. [8] N. Gillis, “The why and how of nonnegative matrix factorization,” in *Regularization, Optimization, Kernels, and Support Vector Machines*, M. Signoretto J.A.K. Suykens and A. Argyriou, Eds., Machine Learning and Pattern Recognition Series, pp. 257 – 291. Chapman & Hall/CRC, 2014.
