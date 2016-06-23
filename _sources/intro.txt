@@ -38,6 +38,10 @@ Popular cost functions such as the Euclidean distance, the generalised KL diverg
 
 where :math:`\odot` is the element-wise product (Hadamard product) and division and power are element-wise. The matrices :math:`\textbf{H}` and :math:`\textbf{W}` are then updated according to an alternating update scheme.
 
+Download
+++++++++
+Source code available at https://github.com/rserizel/beta_nmf
+
 References
 ++++++++++
 
