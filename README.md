@@ -9,8 +9,7 @@ beta_nmf need Python >= 2.7, numpy >= 10.1, Theano >= 0.8, scikit-learn >= 0.17.
 
 ## Documentation
 
-<<<<<<< HEAD
-Dcoumentation available at http://rserizel.github.io/beta_nmf/
+Documentation available at http://rserizel.github.io/beta_nmf/
 
 ## Citation
 
@@ -36,4 +35,3 @@ Romain Serizel, 2015 -- Present
 =======
 Theano based implementation of NMF with beta-diveregence and multiplicative updates.
 Documentation available at http://rserizel.github.io/beta_nmf/
->>>>>>> origin/master
