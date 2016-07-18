@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="Beta-NMF for GPGPU 1.0 documentation" href="index.html" />
-    <link rel="prev" title="NMF with \(\beta\) divergence and multiplicative updates" href="intro.html" /> 
+    <link rel="prev" title="NMF with \(\beta\) -divergence and multiplicative updates" href="intro.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="intro.html" title="NMF with \(\beta\) divergence and multiplicative updates"
+          <a href="intro.html" title="NMF with \(\beta\) -divergence and multiplicative updates"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Beta-NMF for GPGPU 1.0 documentation</a> &raquo;</li> 
       </ul>
@@ -53,8 +53,11 @@
 <span id="documentation"></span><h1>Documentation<a class="headerlink" href="#module-beta_nmf" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="beta-nmf-py">
 <h2>beta_nmf.py<a class="headerlink" href="#beta-nmf-py" title="Permalink to this headline">¶</a></h2>
+<div class="topic">
+<p class="topic-title first">Contents</p>
 <p>The beta_nmf module includes the beta_nmf class,
 fit function and theano functions to compute updates and cost.</p>
+</div>
 <dl class="class">
 <dt id="beta_nmf.BetaNMF">
 <em class="property">class </em><code class="descclassname">beta_nmf.</code><code class="descname">BetaNMF</code><span class="sig-paren">(</span><em>data_shape</em>, <em>n_components=50</em>, <em>beta=2</em>, <em>n_iter=100</em>, <em>fixed_factors=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beta_nmf.html#BetaNMF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#beta_nmf.BetaNMF" title="Permalink to this definition">¶</a></dt>
@@ -142,13 +145,8 @@ fit function and theano functions to compute updates and cost.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : ndarray with nonnegative entries</p>
-<blockquote>
-<div><p>The input array</p>
-</div></blockquote>
-<p><strong>W</strong> : ndarray</p>
 <blockquote class="last">
-<div><p>Optional ndarray that can be broadcasted with X and
-gives weights to apply on the cost function</p>
+<div><p>The input array</p>
 </div></blockquote>
 </td>
 </tr>
@@ -185,8 +183,11 @@ gives weights to apply on the cost function</p>
 </div>
 <span class="target" id="module-base"></span><div class="section" id="base-py">
 <h2>base.py<a class="headerlink" href="#base-py" title="Permalink to this headline">¶</a></h2>
+<div class="topic">
+<p class="topic-title first">Contents</p>
 <p>The base module includes the basic functions such as
 beta-divergence, nonnegative random matrices generator or load_data.</p>
+</div>
 <dl class="function">
 <dt id="base.beta_div">
 <code class="descclassname">base.</code><code class="descname">beta_div</code><span class="sig-paren">(</span><em>X</em>, <em>W</em>, <em>H</em>, <em>beta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/base.html#beta_div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#base.beta_div" title="Permalink to this definition">¶</a></dt>
@@ -300,7 +301,7 @@ beta-divergence, nonnegative random matrices generator or load_data.</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="intro.html"
-                        title="previous chapter">NMF with <span class="math">\(\beta\)</span> divergence and multiplicative updates</a></p>
+                        title="previous chapter">NMF with <span class="math">\(\beta\)</span> -divergence and multiplicative updates</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -332,7 +333,7 @@ beta-divergence, nonnegative random matrices generator or load_data.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="intro.html" title="NMF with \(\beta\) divergence and multiplicative updates"
+          <a href="intro.html" title="NMF with \(\beta\) -divergence and multiplicative updates"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">Beta-NMF for GPGPU 1.0 documentation</a> &raquo;</li> 
       </ul>

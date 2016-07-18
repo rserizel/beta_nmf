@@ -64,9 +64,10 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">beta_nmf.py</span>
 <span class="sd">~~~~~~~~~~~</span>
+<span class="sd">.. topic:: Contents</span>
 
-<span class="sd">The beta_nmf module includes the beta_nmf class,</span>
-<span class="sd">fit function and theano functions to compute updates and cost.&quot;&quot;&quot;</span>
+<span class="sd">    The beta_nmf module includes the beta_nmf class,</span>
+<span class="sd">    fit function and theano functions to compute updates and cost.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
@@ -139,9 +140,6 @@
 <span class="sd">        ----------</span>
 <span class="sd">        X : ndarray with nonnegative entries</span>
 <span class="sd">            The input array</span>
-<span class="sd">        W : ndarray</span>
-<span class="sd">            Optional ndarray that can be broadcasted with X and</span>
-<span class="sd">            gives weights to apply on the cost function</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">tbeta</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;beta&quot;</span><span class="p">)</span>
