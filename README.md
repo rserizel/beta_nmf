@@ -32,6 +32,3 @@ Bibtex
 ## Author
 
 Romain Serizel, 2015 -- Present
-=======
-Theano based implementation of NMF with beta-diveregence and multiplicative updates.
-Documentation available at http://rserizel.github.io/beta_nmf/
