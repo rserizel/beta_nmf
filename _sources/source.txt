@@ -5,7 +5,7 @@ Source code available at https://github.com/rserizel/beta_nmf
 
 Getting Started
 ---------------
-A short example is available as at https://github.com/rserizel/beta_nmf/BetaNMF_howto.ipynb
+A short example is available as at https://github.com/rserizel/beta_nmf/blob/master/BetaNMF_howto.ipynb
 
 Citing
 ------
