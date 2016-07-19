@@ -3,6 +3,13 @@ Download
 
 Source code available at https://github.com/rserizel/beta_nmf
 
+Getting Started
+---------------
+A short example is available as at https://github.com/rserizel/beta_nmf/BetaNMF_howto.ipynb
+
+Citing
+------
+
 If you are using this source code please consider citing the following paper: 
 
 .. topic:: Reference
