@@ -180,17 +180,19 @@ class BetaNMF(object):
         X : array
             The input data
         fixed_factors : array  (default Null)
-        list of factors that are not updated
-            e.g. fixed_factors = [0] -> H is not updated
+            list of factors that are not updated
+                e.g. fixed_factors = [0] -> H is not updated
 
-            fixed_factors = [1] -> W is not updated
+                fixed_factors = [1] -> W is not updated
         """
         self.data_shape = X.shape
         fact_ = [base.nnrandn((dim, self.n_components))
                  for dim in self.data_shape]
-        if 1 not in self.factors:
+        if fixed_factors is None:
+            fixed_factors = []
+        if 1 not in fixed_factors:
             self.w.set_value(fact_[1])
-        if 0 not in self.factors:
+        if 0 not in fixed_factors:
             self.h.set_value(fact_[0])
         self.factors = [self.h, self.w]
 
