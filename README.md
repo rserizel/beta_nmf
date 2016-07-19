@@ -10,7 +10,6 @@ beta_nmf need Python >= 2.7, numpy >= 10.1, Theano >= 0.8, scikit-learn >= 0.17.
 ## Documentation
 
 Documentation available at http://rserizel.github.io/beta_nmf/
-<<<<<<< HEAD
 
 ## Getting Started
 
@@ -41,7 +40,3 @@ Bibtex
 ## Author
 
 Romain Serizel, 2015 -- Present
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
