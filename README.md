@@ -15,8 +15,12 @@ Documentation available at http://rserizel.github.io/beta_nmf/
 
 A short example is available as a [notebook]
 
+<<<<<<< HEAD
 [notebook]: https://github.com/rserizel/beta_nmf/blob/master/BetaNMF_howto.ipynb
 
+=======
+[notebook]: https://github.com/rserizel/beta_nmf/BetaNMF_howto.ipynb
+>>>>>>> origin/master
 
 ## Citation
 
