@@ -8,9 +8,8 @@ Documentation
 
 
 .. automodule:: base
-
-	.. autofunction:: beta_div
-
-	.. autofunction:: load_data
-
-	.. autofunction:: nnrandn
+	:members:
+.. automodule:: costs
+	:members:
+.. automodule:: updates
+	:members:

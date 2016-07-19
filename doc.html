@@ -222,10 +222,13 @@ fit function and theano functions to compute updates and cost.</p>
 <div><p>The input data</p>
 </div></blockquote>
 <p><strong>fixed_factors</strong> : array  (default Null)</p>
-<p><strong>list of factors that are not updated</strong></p>
 <blockquote class="last">
-<div><p>e.g. fixed_factors = [0] -&gt; H is not updated</p>
-<p>fixed_factors = [1] -&gt; W is not updated</p>
+<div><dl class="docutils">
+<dt>list of factors that are not updated</dt>
+<dd><p class="first">e.g. fixed_factors = [0] -&gt; H is not updated</p>
+<p class="last">fixed_factors = [1] -&gt; W is not updated</p>
+</dd>
+</dl>
 </div></blockquote>
 </td>
 </tr>
@@ -365,6 +368,119 @@ beta-divergence, nonnegative random matrices generator or load_data.</p>
 </dd></dl>
 
 </div>
+<span class="target" id="module-costs"></span><div class="section" id="cost-py">
+<h2>cost.py<a class="headerlink" href="#cost-py" title="Permalink to this headline">¶</a></h2>
+<div class="topic">
+<p class="topic-title first">Contents</p>
+<p>The cost module regroups the cost functions used for the beta NMF</p>
+</div>
+<dl class="function">
+<dt id="costs.beta_div">
+<code class="descclassname">costs.</code><code class="descname">beta_div</code><span class="sig-paren">(</span><em>X</em>, <em>W</em>, <em>H</em>, <em>beta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/costs.html#beta_div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#costs.beta_div" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute beta divergence D(X|WH)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : Theano tensor</p>
+<blockquote>
+<div><p>data</p>
+</div></blockquote>
+<p><strong>W</strong> : Theano tensor</p>
+<blockquote>
+<div><p>Bases</p>
+</div></blockquote>
+<p><strong>H</strong> : Theano tensor</p>
+<blockquote>
+<div><p>activation matrix</p>
+</div></blockquote>
+<p><strong>beta</strong> : Theano scalar</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>div</strong> : Theano scalar</p>
+<blockquote class="last">
+<div><p>beta divergence D(X|WH)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-updates"></span><div class="section" id="updates-py">
+<h2>updates.py<a class="headerlink" href="#updates-py" title="Permalink to this headline">¶</a></h2>
+<div class="topic">
+<p class="topic-title first">Contents</p>
+<p>The update module regroupse the update functions used for the beta NMF</p>
+</div>
+<dl class="function">
+<dt id="updates.beta_H">
+<code class="descclassname">updates.</code><code class="descname">beta_H</code><span class="sig-paren">(</span><em>X</em>, <em>W</em>, <em>H</em>, <em>beta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/updates.html#beta_H"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#updates.beta_H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update activation with beta divergence</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : Theano tensor</p>
+<blockquote>
+<div><p>data</p>
+</div></blockquote>
+<p><strong>W</strong> : Theano tensor</p>
+<blockquote>
+<div><p>Bases</p>
+</div></blockquote>
+<p><strong>H</strong> : Theano tensor</p>
+<blockquote>
+<div><p>activation matrix</p>
+</div></blockquote>
+<p><strong>beta</strong> : Theano scalar</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>H</strong> : Theano tensor</p>
+<blockquote class="last">
+<div><p>Updated version of the activations</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="updates.beta_W">
+<code class="descclassname">updates.</code><code class="descname">beta_W</code><span class="sig-paren">(</span><em>X</em>, <em>W</em>, <em>H</em>, <em>beta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/updates.html#beta_W"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#updates.beta_W" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update bases with beta divergence</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>X</strong> : Theano tensor</p>
+<blockquote>
+<div><p>data</p>
+</div></blockquote>
+<p><strong>W</strong> : Theano tensor</p>
+<blockquote>
+<div><p>Bases</p>
+</div></blockquote>
+<p><strong>H</strong> : Theano tensor</p>
+<blockquote>
+<div><p>activation matrix</p>
+</div></blockquote>
+<p><strong>beta</strong> : Theano scalar</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>W</strong> : Theano tensor</p>
+<blockquote class="last">
+<div><p>Updated version of the bases</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -378,6 +494,8 @@ beta-divergence, nonnegative random matrices generator or load_data.</p>
 <li><a class="reference internal" href="#">Documentation</a><ul>
 <li><a class="reference internal" href="#beta-nmf-py">beta_nmf.py</a></li>
 <li><a class="reference internal" href="#base-py">base.py</a></li>
+<li><a class="reference internal" href="#cost-py">cost.py</a></li>
+<li><a class="reference internal" href="#updates-py">updates.py</a></li>
 </ul>
 </li>
 </ul>
