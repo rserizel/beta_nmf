@@ -1,35 +1,22 @@
 # -*- coding: utf-8 -*-
-# Copyright © 2015 Telecom ParisTech, TSI
-# Auteur(s) : Romain Serizel
-# the beta_nmf module for GPGPU is free software: you can redistribute it
-# or modify it under the terms of the GNU Lesser General Public License
-# as published by the Free Software Foundation, either version 3
-# of the License, or (at your option) any later version.
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Lesser General Public License for more details.
-# You should have received a copy of the GNU LesserGeneral Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
-beta_nmf.py
+beta\_nmf.py
 ~~~~~~~~~~~
 
-The beta_nmf module includes the beta_nmf class,
-fit function and theano functions to compute updates and cost."""
+.. topic:: Contents
+
+  The beta_nmf module includes the beta\_nmf class,
+  fit function and theano functions to compute updates and cost."""
 
 import time
 import numpy as np
 import theano
-import theano.tensor as T
-from base import beta_div
-from base import nnrandn
-from base import load_data
-
-FILE_NAME = ("../short_set_cqt.h5")
+import base
+import updates
+import costs
 
 
-class BetaNMF:
+class BetaNMF(object):
     """BetaNMF class
 
     Performs nonnegative matrix factorization with Theano.
@@ -70,143 +57,161 @@ class BetaNMF:
 
     # Constructor
     def __init__(self, data_shape, n_components=50, beta=2, n_iter=100,
-                 fixed_factors=None, verbose=0):
+                 fixed_factors=None, verbose=0, cold_start=True):
         self.data_shape = data_shape
         self.n_components = n_components
-        self.beta = float(beta)
-        self.n_iter = n_iter
+        self.n_components = np.asarray(n_components, dtype='int32')
+        self.beta = theano.shared(np.asarray(beta, theano.config.floatX),
+                                  name="beta")
         self.verbose = verbose
+        self.n_iter = n_iter
+        self.scores = []
+        self.cold_start = cold_start
         if fixed_factors is None:
             fixed_factors = []
         self.fixed_factors = fixed_factors
-        self.factors = [nnrandn((dim, self.n_components))
-                        for dim in data_shape]
+        fact_ = [base.nnrandn((dim, self.n_components)) for dim in data_shape]
+        self.w = theano.shared(fact_[1].astype(theano.config.floatX),
+                               name="W", borrow=True, allow_downcast=True)
+        self.h = theano.shared(fact_[0].astype(theano.config.floatX),
+                               name="H", borrow=True, allow_downcast=True)
+        self.factors = [self.h, self.w]
+        self.x = theano.shared(
+          np.zeros((data_shape)).astype(theano.config.floatX), name="X")
+        self.get_updates_functions()
+        self.get_div_function()
 
-    def fit(self, X):
+    def check_shape(self):
+        """Check that all the matrix have consistent shapes"""
+        self.data_shape = self.x.get_value().shape
+        dim = long(self.n_components)
+        if self.w.get_value().shape != (self.data_shape[1], dim):
+            print "Inconsistent data for W, expected {1}, found {0}".format(
+                self.w.get_value().shape,
+                (self.data_shape[1], dim))
+            raise SystemExit
+        if self.h.get_value().shape != (self.data_shape[0], dim):
+            print "Inconsistent shape for H, expected {1}, found {0}".format(
+                self.h.get_value().shape,
+                (self.data_shape[0], dim))
+            raise SystemExit
+
+    def fit(self, data, warm_start=False):
         """Learns NMF model
 
         Parameters
         ----------
         X : ndarray with nonnegative entries
             The input array
-        W : ndarray
-            Optional ndarray that can be broadcasted with X and
-            gives weights to apply on the cost function
+        warm_start : Boolean (default False)
+            start from new values
         """
 
-        tbeta = theano.shared(self.beta, name="beta")
-        tX = theano.shared(X.astype(theano.config.floatX), name="X")
-        tH = theano.shared(self.factors[0].astype(theano.config.floatX),
-                           name="H")
-        tW = theano.shared(self.factors[1].astype(theano.config.floatX),
-                           name="W")
-
-        upW = tW*((T.dot(T.mul(T.power(T.dot(tH, tW.T), (tbeta - 2)),
-                               tX).T, tH)) /
-                  (T.dot(T.power(T.dot(tH, tW.T), (tbeta-1)).T, tH)))
-        upH = tH*((T.dot(T.mul(T.power(T.dot(tH, tW.T), (tbeta - 2)),
-                               tX), tW)) /
-                  (T.dot(T.power(T.dot(tH, tW.T), (tbeta-1)), tW)))
-        trainW = theano.function(inputs=[],
-                                 outputs=[],
-                                 updates={tW: upW},
-                                 name="trainH")
-        trainH = theano.function(inputs=[],
-                                 outputs=[],
-                                 updates={tH: upH},
-                                 name="trainH")
+        if not warm_start:
+            self.set_factors(data, self.fixed_factors)
+        self.x.set_value(data.astype(theano.config.floatX))
+        self.check_shape()
 
         print 'Fitting NMF model with %d iterations....' % self.n_iter
 
         # main loop
         for it in range(self.n_iter):
+            if 'tick' not in locals():
+                tick = time.time()
             if self.verbose > 0:
                 if it == 0:
-                    if 'tick' not in locals():
-                        tick = time.time()
-                    if 0 not in self.fixed_factors:
-                        self.factors[0] = tH.get_value()
-                    if 1 not in self.fixed_factors:
-                        self.factors[1] = tW .get_value()
+                    score = self.score()
                     print ('Iteration %d / %d, duration=%.1fms, cost=%f'
                            % (it, self.n_iter, (time.time() - tick) * 1000,
-                              self.score(X)))
+                              score))
             if 1 not in self.fixed_factors:
-                trainW()
+                self.train_w()
             if 0 not in self.fixed_factors:
-                trainH()
-
+                self.train_h()
             if self.verbose > 0:
                 if (it+1) % self.verbose == 0:
-                    if 'tick' not in locals():
-                        tick = time.time()
-                    if 0 not in self.fixed_factors:
-                        self.factors[0] = tH.get_value()
-                    if 1 not in self.fixed_factors:
-                        self.factors[1] = tW .get_value()
+                    score = self.score()
                     print ('Iteration %d / %d, duration=%.1fms, cost=%f'
-                           % ((it+1), self.n_iter, (time.time() - tick) * 1000,
-                              self.score(X)))
+                           % (it+1, self.n_iter, (time.time() - tick) * 1000,
+                              score))
                     tick = time.time()
-
-        self.factors[0] = tH.get_value()
-        self.factors[1] = tW.get_value()
         print 'Done.'
-        return self
 
-    def score(self, X):
-        """Computes the total beta-divergence between the current model and X
+    def get_div_function(self):
+        """Compile the theano-based divergence function"""
+        self.div = theano.function(inputs=[],
+                                   outputs=costs.beta_div(self.x,
+                                                          self.w.T,
+                                                          self.h,
+                                                          self.beta),
+                                   name="div",
+                                   allow_input_downcast=True)
+
+    def get_updates_functions(self):
+        """Compile the theano based update functions"""
+        print "Standard rules for beta-divergence"
+        h_update = updates.beta_H(self.x, self.w, self.h, self.beta)
+        w_update = updates.beta_W(self.x, self.w, self.h, self.beta)
+        self.train_h = theano.function(inputs=[],
+                                       outputs=[],
+                                       updates={self.h: h_update},
+                                       name="trainH",
+                                       allow_input_downcast=True)
+        self.train_w = theano.function(inputs=[],
+                                       outputs=[],
+                                       updates={self.w: w_update},
+                                       name="trainW",
+                                       allow_input_downcast=True)
+
+    def score(self):
+        """Compute factorisation score
+
+        Returns
+        -------
+        out : Float
+            factorisation score"""
+        return self.div()
+
+    def set_factors(self, X, fixed_factors=None):
+        """reset factors
 
         Parameters
         ----------
         X : array
             The input data
+        fixed_factors : array  (default Null)
+        list of factors that are not updated
+            e.g. fixed_factors = [0] -> H is not updated
+
+            fixed_factors = [1] -> W is not updated
+        """
+        self.data_shape = X.shape
+        fact_ = [base.nnrandn((dim, self.n_components))
+                 for dim in self.data_shape]
+        if 1 not in self.factors:
+            self.w.set_value(fact_[1])
+        if 0 not in self.factors:
+            self.h.set_value(fact_[0])
+        self.factors = [self.h, self.w]
+
+    def transform(self, X, warm_start=False):
+        """Project data X on the basis W
+
+        Parameters
+        ----------
+        X : array
+            The input data
+        warm_start : Boolean (default False)
+            start from previous values
 
         Returns
         -------
-        out : float
-            The beta-divergence
+        H : array
+            Activations
         """
-        tbeta = theano.shared(self.beta, name="beta")
-        tX = theano.shared(X.astype(theano.config.floatX), name="X")
-        tH = theano.shared(self.factors[0].astype(theano.config.floatX),
-                           name="H")
-        tW = theano.shared(self.factors[1].astype(theano.config.floatX),
-                           name="W")
-
-        div = theano.function(inputs=[],
-                              outputs=beta_div(tX, tW.T, tH, tbeta),
-                              name="div")
-        return div()
-
-if __name__ == '__main__':
-    """Example script"""
-    dataset = load_data(f_name=FILE_NAME)
-    x = dataset['x_train']
-
-    beta_nmf = BetaNMF(x.shape,
-                       n_components=100,
-                       beta=2,
-                       n_iter=1000,
-                       verbose=20)
-
-    # Fit the model
-    tic = time.time()
-    beta_nmf.fit(x)
-    tic = time.time() - tic
-    print 'NMF model trained, duration=%.1fs' % tic
-    print 'Resulting score', beta_nmf.score(x)
-
-    # Project data on H while keeping the bases W fixed
-    tic = time.time()
-    beta_nmf1 = BetaNMF(x.shape,
-                        n_components=100,
-                        beta=2,
-                        fixed_factors=[1],
-                        n_iter=100,
-                        verbose=20)
-    beta_nmf1.factors[1] = beta_nmf.factors[1]
-    beta_nmf1.fit(x[0:1500])
-    tic = time.time() - tic
-    print 'NMF model trained, duration=%.1fs' % tic
-    print 'Resulting score', beta_nmf.score(x)
+        self.fixed_factors = [1]
+        if not warm_start:
+            print "cold start"
+            self.set_factors(X, self.fixed_factors)
+        self.fit(X, warm_start=True)
+        return self.h.get_value()

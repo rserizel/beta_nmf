@@ -14,9 +14,10 @@
 """
 base.py
 ~~~~~~~
+.. topic:: Contents
 
-The base module includes the basic functions such as
-beta-divergence, nonnegative random matrices generator or load_data."""
+    The base module includes the basic functions such as
+    beta-divergence, nonnegative random matrices generator or load_data."""
 
 import numpy as np
 import theano.tensor as T
