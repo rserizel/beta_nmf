@@ -70,6 +70,8 @@ class BetaNMF(object):
         if fixed_factors is None:
             fixed_factors = []
         self.fixed_factors = fixed_factors
+        self.eps = theano.shared(np.asarray(1e-10, theano.config.floatX),
+                                 name="beta")
         fact_ = [base.nnrandn((dim, self.n_components)) for dim in data_shape]
         self.w = theano.shared(fact_[1].astype(theano.config.floatX),
                                name="W", borrow=True, allow_downcast=True)
@@ -150,8 +152,16 @@ class BetaNMF(object):
     def get_updates_functions(self):
         """Compile the theano based update functions"""
         print "Standard rules for beta-divergence"
-        h_update = updates.beta_H(self.x, self.w, self.h, self.beta)
-        w_update = updates.beta_W(self.x, self.w, self.h, self.beta)
+        h_update = updates.beta_H(self.x,
+                                  self.w,
+                                  self.h,
+                                  self.beta,
+                                  self.eps)
+        w_update = updates.beta_W(self.x,
+                                  self.w,
+                                  self.h,
+                                  self.beta,
+                                  self.eps)
         self.train_h = theano.function(inputs=[],
                                        outputs=[],
                                        updates={self.h: h_update},
