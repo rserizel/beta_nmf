@@ -4,7 +4,12 @@ updates.py
 ~~~~~~~~~~
 .. topic:: Contents
 
-  The update module regroupse the update functions used for the beta NMF"""
+  The update module regroupse the update functions used for the beta NMF
+  
+  Copyright 2014-2016 Romain Serizel
+
+  This software is distributed under the terms of the GNU Public License 
+  version 3 (http://www.gnu.org/licenses/gpl.txt)"""
 
 import theano.tensor as T
 import theano
