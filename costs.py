@@ -4,7 +4,12 @@ cost.py
 ~~~~~~~
 .. topic:: Contents
 
-    The cost module regroups the cost functions used for the beta NMF"""
+    The cost module regroups the cost functions used for the beta NMF
+    
+    Copyright 2014-2016 Romain Serizel
+
+    This software is distributed under the terms of the GNU Public License 
+    version 3 (http://www.gnu.org/licenses/gpl.txt)"""
 import theano.tensor as T
 from theano.ifelse import ifelse
 import theano
