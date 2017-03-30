@@ -1,23 +1,16 @@
 # -*- coding: utf-8 -*-
-# Copyright © 2015 Telecom ParisTech, TSI
-# Auteur(s) : Romain Serizel
-# the beta_nmf module for GPGPU is free software: you can redistribute it
-# or modify it under the terms of the GNU Lesser General Public License
-# as published by the Free Software Foundation, either version 3
-# of the License, or (at your option) any later version.
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU Lesser General Public License for more details.
-# You should have received a copy of the GNU LesserGeneral Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
 """
 base.py
 ~~~~~~~
 .. topic:: Contents
 
     The base module includes the basic functions such as
-    beta-divergence, nonnegative random matrices generator or load_data."""
+    beta-divergence, nonnegative random matrices generator or load_data.
+
+    Copyright 2014-2016 Romain Serizel
+
+    This software is distributed under the terms of the GNU Public License 
+    version 3 (http://www.gnu.org/licenses/gpl.txt)"""
 
 import numpy as np
 import theano.tensor as T
